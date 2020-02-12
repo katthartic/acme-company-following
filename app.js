@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 const API = "https://acme-users-api-rev.herokuapp.com/api";
 const { Component } = React;
 const { render } = ReactDOM;
@@ -33,6 +34,24 @@ const setupApp = async () => {
     };
 };
 
+const updateFollowing = async (userId, companyId, rating, action) => {
+    let followee = {}
+    const followeeList = (await axios.get(`${API}/users/${userId}/followingCompanies`)).data
+    console.log('following list', followeeList)
+
+    if (followeeList.length === 5) {
+        await axios.delete(`${API}/users/${userId}/followingCompanies/${followeeList[0].id}`)
+    }
+
+    if (action === 'put') {
+        followee = (await axios.put(`${API}/users/${userId}/followingCompanies/${companyId}`, { rating, companyId })).data
+    } else {
+        followee = (await axios.post(`${API}/users/${userId}/followingCompanies`, { rating, companyId })).data
+    }
+    console.log(`updateFollowing-${action}:`, followee)
+    return followee
+}
+
 class App extends Component {
     constructor() {
         super();
@@ -44,9 +63,18 @@ class App extends Component {
         this.onUpdate = this.onUpdate.bind(this);
     }
 
-    onUpdate(change) {
-        console.log("change", change);
-        //   this.setState(change);
+    onUpdate(rating, companyId) {
+        const { user, following } = this.state
+        const followingIds = following.map(company => company.companyId)
+        let action = 'post'
+
+        followingIds.forEach(followId => {
+            if (followId === companyId) action = 'put'
+        })
+
+        let followee = updateFollowing(user.id, companyId, rating, action)
+        console.log('onUpdate', user.id, companyId, rating, action)
+
     }
 
     componentDidMount() {
@@ -86,7 +114,7 @@ class App extends Component {
                                 {company.name}
                                 <select
                                     value={rating}
-                                    onChange={ev => onUpdate(ev.target.value)}
+                                    onChange={ev => onUpdate(ev.target.value, company.id)}
                                 >
                                     {choices.map(choice => {
                                         return (
