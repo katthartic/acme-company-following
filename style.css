@@ -9,3 +9,15 @@ form {
 .following {
   background-color: tomato;
 }
+
+label {
+  display: flex;
+  flex-direction: column;
+  margin: 0.5rem;
+  padding: 1rem;
+  border-bottom: black solid 1px;
+}
+
+option {
+  padding: 2rem;
+}
