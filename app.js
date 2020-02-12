@@ -34,36 +34,48 @@ const setupApp = async () => {
   }
 }
 
-const updateFollowing = async (userId, companyId, rating, action) => {
-  let followee = {}
+const updateFollowing = async (userId, companyId, rating, followee) => {
+  let currentFollowee = {}
   const followeeList = (
     await axios.get(`${API}/users/${userId}/followingCompanies`)
   ).data
-  console.log('following list', followeeList)
+  console.log('updateFollowing-following list', followeeList)
 
-  if (followeeList.length === 5) {
-    await axios.delete(
-      `${API}/users/${userId}/followingCompanies/${followeeList[0].id}`
-    )
-  }
-
-  if (action === 'put') {
-    followee = (
+  if (followee && rating) {
+    console.log('updateFollowing-put', followee)
+    currentFollowee = (
       await axios.put(
-        `${API}/users/${userId}/followingCompanies/${companyId}`,
+        `${API}/users/${userId}/followingCompanies/${followee.id}`,
         { rating, companyId }
       )
     ).data
+  } else if (followee && !rating) {
+    console.log('updateFollowing-deletefollowee', followee)
+    await axios.delete(
+      `${API}/users/${userId}/followingCompanies/${followee.id}`
+    )
   } else {
-    followee = (
+    if (followeeList.length === 5) {
+      console.log('updateFollowing-delete', followeeList[0])
+      await axios.delete(
+        `${API}/users/${userId}/followingCompanies/${followeeList[0].id}`
+      )
+    }
+
+    currentFollowee = (
       await axios.post(`${API}/users/${userId}/followingCompanies`, {
         rating,
         companyId
       })
     ).data
+    console.log('updateFollowing-post', currentFollowee)
   }
-  console.log(`updateFollowing-${action}:`, followee)
-  return followee
+
+  const newList = axios.get(`${API}/users/${userId}/followingCompanies`)
+
+  console.log('updateFollowing-newList', newList)
+
+  return newList
 }
 
 class App extends Component {
@@ -80,14 +92,20 @@ class App extends Component {
   onUpdate(rating, companyId) {
     const { user, following } = this.state
     const followingIds = following.map(company => company.companyId)
-    let action = 'post'
+    let followeeIdx
 
-    followingIds.forEach(followId => {
-      if (followId === companyId) action = 'put'
+    followingIds.forEach((followId, idx) => {
+      if (followId === companyId) {
+        followeeIdx = idx
+      }
     })
 
-    let followee = updateFollowing(user.id, companyId, rating, action)
-    console.log('onUpdate', user.id, companyId, rating, action)
+    updateFollowing(user.id, companyId, rating, following[followeeIdx]).then(
+      response => {
+        this.setState({ following: response.data })
+        console.log('onUpdate-state', this.state)
+      }
+    )
   }
 
   componentDidMount() {
