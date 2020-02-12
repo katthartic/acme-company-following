@@ -71,7 +71,7 @@ const updateFollowing = async (userId, companyId, rating, followee) => {
     console.log('updateFollowing-post', currentFollowee)
   }
 
-  const newList = axios.get(`${API}/users/${userId}/followingCompanies`)
+  const newList = await axios.get(`${API}/users/${userId}/followingCompanies`)
 
   console.log('updateFollowing-newList', newList)
 
@@ -91,14 +91,9 @@ class App extends Component {
 
   onUpdate(rating, companyId) {
     const { user, following } = this.state
-    const followingIds = following.map(company => company.companyId)
-    let followeeIdx
-
-    followingIds.forEach((followId, idx) => {
-      if (followId === companyId) {
-        followeeIdx = idx
-      }
-    })
+    const followeeIdx = following
+      .map(company => company.companyId)
+      .findIndex(followId => followId === companyId)
 
     updateFollowing(user.id, companyId, rating, following[followeeIdx]).then(
       response => {
@@ -138,22 +133,22 @@ class App extends Component {
             const rating = getRating()
 
             return (
-              <label
-                className={followingCompany ? 'following' : ''}
-                key={company.id}>
-                {company.name}
-                <select
-                  value={rating}
-                  onChange={ev => onUpdate(ev.target.value, company.id)}>
-                  {choices.map(choice => {
-                    return (
-                      <option key={choice} value={choice}>
-                        {choice}
-                      </option>
-                    )
-                  })}
-                </select>
-              </label>
+              <div className="companies" key={company.id}>
+                <label className={followingCompany ? 'following' : ''}>
+                  {company.name}
+                  <select
+                    value={rating}
+                    onChange={ev => onUpdate(ev.target.value, company.id)}>
+                    {choices.map(choice => {
+                      return (
+                        <option key={choice} value={choice}>
+                          {choice}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </label>
+              </div>
             )
           })}
         </form>
