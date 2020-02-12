@@ -10,14 +10,20 @@ form {
   background-color: tomato;
 }
 
-label {
+.companies {
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
   margin: 0.5rem;
-  padding: 1rem;
   border-bottom: black solid 1px;
 }
 
-option {
-  padding: 2rem;
+label {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+select {
+  margin-top: 0.5rem;
 }
