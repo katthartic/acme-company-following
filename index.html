@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const API = "https://acme-users-api-rev.herokuapp.com/api";
+      const { Component } = React;
+      const { render } = ReactDOM;
+
+      const fetchUser = async () => {
+        const storage = window.localStorage;
+        const userId = storage.getItem("userId");
+
+        if (userId) {
+          try {
+            return (await axios.get(`${API}/users/detail/${userId}`)).data;
+          } catch (ex) {
+            storage.removeItem("userId");
+            return fetchUser();
+          }
+        }
+        const user = (await axios.get(`${API}/users/random`)).data;
+        storage.setItem("userId", user.id);
+        return user;
+      };
+
+      const setupApp = async () => {
+        const user = await fetchUser();
+        const companies = (await axios.get(`${API}/companies`)).data;
+        const following = await axios.get(
+          `${API}/users/${user.id}/followingCompanies`
+        );
+      };
+
+      class App extends Component {
+        constructor() {
+          super();
+          this.state = {
+            user: {},
+            following: [],
+            companies: []
+          };
+        }
+
+        render() {
+          return <hr />;
+        }
+      }
+
+      const root = document.querySelector("#root");
+      render(<App />, root);
+    </script>
+  </body>
+</html>
