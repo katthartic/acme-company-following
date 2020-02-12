@@ -77,19 +77,22 @@
             following: [],
             companies: []
           };
+          this.onUpdate = this.onUpdate.bind(this);
+        }
+
+        onUpdate(change) {
+          console.log("change", change);
+          //   this.setState(change);
         }
 
         componentDidMount() {
           setupApp().then(response => this.setState(response));
         }
 
-        onUpdate() {}
-
         render() {
           const { user, companies, following } = this.state;
           const choices = ["", 1, 2, 3, 4, 5];
-          console.log(companies);
-          console.log(following);
+          const { onUpdate } = this;
           return (
             <div>
               <h1>Acme Company Follower</h1>
@@ -111,15 +114,16 @@
 
                   const rating = getRating();
 
-                  console.log("following", followingCompany);
-                  console.log("rating", rating);
                   return (
                     <label
                       className={followingCompany ? "following" : ""}
                       key={company.id}
                     >
                       {company.name}
-                      <select value={rating}>
+                      <select
+                        value={rating}
+                        onChange={ev => onUpdate(ev.target.value)}
+                      >
                         {choices.map(choice => {
                           return (
                             <option key={choice} value={choice}>
