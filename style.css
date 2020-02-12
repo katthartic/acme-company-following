@@ -1,11 +1,11 @@
 body {
-    font-family: sans-serif;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-  }
+  font-family: sans-serif;
+}
+form {
+  display: flex;
+  flex-direction: column;
+}
 
-  .following {
-    background-color: tomato;
-  }
+.following {
+  background-color: tomato;
+}
