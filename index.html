@@ -15,6 +15,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .following {
+        background-color: tomato;
+      }
+    </style>
   </head>
 
   <body>
@@ -45,9 +58,15 @@
       const setupApp = async () => {
         const user = await fetchUser();
         const companies = (await axios.get(`${API}/companies`)).data;
-        const following = await axios.get(
-          `${API}/users/${user.id}/followingCompanies`
-        );
+        const following = (
+          await axios.get(`${API}/users/${user.id}/followingCompanies`)
+        ).data;
+
+        return {
+          user,
+          companies,
+          following
+        };
       };
 
       class App extends Component {
@@ -60,8 +79,61 @@
           };
         }
 
+        componentDidMount() {
+          setupApp().then(response => this.setState(response));
+        }
+
+        onUpdate() {}
+
         render() {
-          return <hr />;
+          const { user, companies, following } = this.state;
+          const choices = ["", 1, 2, 3, 4, 5];
+          console.log(companies);
+          console.log(following);
+          return (
+            <div>
+              <h1>Acme Company Follower</h1>
+              <h2>
+                You ({user.fullName}) are following {following.length} Companies
+              </h2>
+              <form>
+                {companies.map(company => {
+                  const followingCompany = following.find(
+                    followee => followee.companyId === company.id
+                  );
+                  const getRating = () => {
+                    if (followingCompany) {
+                      return followingCompany.rating;
+                    } else {
+                      return "";
+                    }
+                  };
+
+                  const rating = getRating();
+
+                  console.log("following", followingCompany);
+                  console.log("rating", rating);
+                  return (
+                    <label
+                      className={followingCompany ? "following" : ""}
+                      key={company.id}
+                    >
+                      {company.name}
+                      <select value={rating}>
+                        {choices.map(choice => {
+                          return (
+                            <option key={choice} value={choice}>
+                              {choice}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </label>
+                  );
+                })}
+              </form>
+            </div>
+          );
         }
       }
 
